@@ -9,7 +9,7 @@ const router = createRouter({
 // Navigation Guards
 router.beforeEach((to, from, next) => {
   // Update document title
-  document.title = `${to.meta.title} | Your App Name`
+  document.title = `${to.meta.title} | TMovies`
 
   // Check for protected routes
   if (to.meta.requiresAuth) {

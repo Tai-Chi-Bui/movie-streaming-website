@@ -17,7 +17,6 @@
 </template>
 
 <script lang="ts">
-import { RouterLink } from 'vue-router'
 import { HomeIcon } from '@heroicons/vue/24/solid'
 
 export default {
@@ -28,18 +27,6 @@ export default {
           path: '/',
           icon: HomeIcon,
           name: '',
-        },
-        {
-          path: '/mythical-creatures',
-          name: 'Mythical',
-        },
-        {
-          path: '/calculator',
-          name: 'Calculator',
-        },
-        {
-          path: '/profile',
-          name: 'Profile',
         },
       ],
     }
