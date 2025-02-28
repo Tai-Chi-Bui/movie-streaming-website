@@ -1,84 +1,72 @@
-# Turborepo starter
+# Services Architecture
 
-This Turborepo starter is maintained by the Turborepo core team.
+## API Gateway (NestJS)
 
-## Using this example
+The API Gateway serves as the single entry point for all client requests, built with:
 
-Run the following command:
+- **NestJS**: Provides robust dependency injection, modular architecture, and built-in support for microservices
 
-```sh
-npx create-turbo@latest
-```
+Key responsibilities:
 
-## What's inside?
+- Routes API requests to appropriate microservices using intelligent routing
+- Handles authentication via JWT for secure access
+- Acts as a reverse proxy to hide internal service complexity
 
-This Turborepo includes the following packages/apps:
+## Auth Service (NestJS + gRPC)
 
-### Apps and Packages
+Handles all authentication flows, built with:
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- **NestJS**: Perfect for handling auth workflows with extensive auth libraries and built-in security features
+- **gRPC**: Chosen for token validation as it provides low-latency, type-safe communication needed for high-frequency auth checks. Kafka would add unnecessary complexity and latency for these synchronous operations.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+Core features:
 
-### Utilities
+- Manages user authentication with multiple strategies (email/password, OAuth)
+- Issues and validates JWT tokens with configurable expiry
+- Provides gRPC endpoints for other services to verify tokens
 
-This Turborepo has some additional tools already setup for you:
+## Movies Service (NestJS + gRPC/Kafka)
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+Manages all movie-related operations, using:
 
-### Build
+- **NestJS**: Offers excellent TypeScript support and modular architecture
+- **gRPC**: Used for real-time operations like fetching movie details where immediate response is required
+- **Kafka**: Used for analytics processing where eventual consistency is acceptable and high throughput is needed
 
-To build all apps and packages, run the following command:
+Capabilities:
 
-```
-cd my-turborepo
-pnpm build
-```
+- Stores and serves movie metadata (title, description, genres etc.) via gRPC
+- Handles user subscription logic and access control via gRPC
+- Processes viewing analytics via Kafka for recommendations
 
-### Develop
+## Streaming Service (NestJS + gRPC/Kafka)
 
-To develop all apps and packages, run the following command:
+Optimized for video delivery:
 
-```
-cd my-turborepo
-pnpm dev
-```
+- **NestJS**: Provides excellent streaming capabilities through built-in Observable support
+- **gRPC**: Used for stream initialization where bidirectional streaming is needed
+- **Kafka**: Used for analytics where eventual consistency is acceptable
 
-### Remote Caching
+Features:
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+- Handles video streaming with adaptive bitrate
+- Uses efficient chunking and buffering strategies
+- Tracks detailed viewing analytics via Kafka
 
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+## Kafka Event Bus
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+Central nervous system for async communication:
+(Used when real-time response isn't critical and data persistence is important)
 
-```
-cd my-turborepo
-npx turbo login
-```
+Topics:
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+- `user-authenticated`: Triggers post-login workflows
+- `movie-played`: Updates watch history, recommendations
+- `movie-paused`: Saves timestamp for resume
+- `subscription-updated`: Syncs access permissions
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+Benefits:
 
-```
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+- Decoupled services can scale independently
+- Reliable event delivery with persistence
+- Enables real-time analytics and monitoring
